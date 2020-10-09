@@ -19,9 +19,7 @@ import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterMain;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class FlutterBoost {
@@ -216,9 +214,10 @@ public class FlutterBoost {
 
         private INativeRouter router = null;
 
-        private List<String> shellArgs;
-
         private BoostLifecycleListener lifecycleListener;
+
+
+
 
         public ConfigBuilder(Application app, INativeRouter router) {
             this.router = router;
@@ -250,13 +249,9 @@ public class FlutterBoost {
             return this;
         }
 
+
         public ConfigBuilder lifecycleListener(BoostLifecycleListener lifecycleListener) {
             this.lifecycleListener = lifecycleListener;
-            return this;
-        }
-
-        public ConfigBuilder shellArgs(List<String> shellArgs) {
-            this.shellArgs = shellArgs;
             return this;
         }
 
@@ -290,10 +285,6 @@ public class FlutterBoost {
 
                 public FlutterView.RenderMode renderMode() {
                     return ConfigBuilder.this.renderMode;
-                }
-
-                public List<String> shellArgs() {
-                    return ConfigBuilder.this.shellArgs;
                 }
             };
 
@@ -329,7 +320,7 @@ public class FlutterBoost {
         if (mEngine == null) {
             FlutterMain.startInitialization(mPlatform.getApplication());
 
-            FlutterShellArgs flutterShellArgs = new FlutterShellArgs(mPlatform.shellArgs() != null ? mPlatform.shellArgs() : Arrays.asList(""));
+            FlutterShellArgs flutterShellArgs = new FlutterShellArgs(new String[0]);
             FlutterMain.ensureInitializationComplete(
                     mPlatform.getApplication().getApplicationContext(), flutterShellArgs.toArray());
 
