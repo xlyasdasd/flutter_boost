@@ -27,6 +27,8 @@ import io.flutter.plugin.common.PluginRegistry;
  */
 public abstract class Platform {
 
+    public abstract int initialAfterActivityDestroyCount();
+
     public abstract Application getApplication();
 
     public abstract void openContainer(Context context, String url, Map<String, Object> urlParams, int requestCode, Map<String, Object> exts);

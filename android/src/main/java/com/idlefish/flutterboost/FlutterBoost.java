@@ -35,6 +35,7 @@ public class FlutterBoost {
     private long FlutterPostFrameCallTime = 0;
     private Application.ActivityLifecycleCallbacks mActivityLifecycleCallbacks;
     private PluginRegistry mRegistry;
+    private int activityDestroyCount = 0;
 
     public long getFlutterPostFrameCallTime() {
         return FlutterPostFrameCallTime;
@@ -56,7 +57,6 @@ public class FlutterBoost {
             Debuger.log("FlutterBoost is alread inited. Do not init twice");
             return;
         }
-
         mPlatform = platform;
         mManager = new FlutterViewContainerManager();
 
@@ -135,6 +135,10 @@ public class FlutterBoost {
                 if (!mEnterActivityCreate){
                     return;
                 }
+                activityDestroyCount++;
+                if(mPlatform.whenEngineStart() == ConfigBuilder.AFTER_ACTIVITY_DESTROY_COUNT && activityDestroyCount==mPlatform.initialAfterActivityDestroyCount()){
+                    doInitialFlutter();
+                }
                 if (mCurrentActiveActivity == activity) {
                     Debuger.log("Application entry background");
 
@@ -196,6 +200,7 @@ public class FlutterBoost {
 
         public static int FLUTTER_ACTIVITY_CREATED = 2; //当有flutterActivity创建时,启动引擎
 
+        public static int AFTER_ACTIVITY_DESTROY_COUNT=3;//当某些数量的activity被销毁时，启动引擎
 
         public static int APP_EXit = 0; //所有flutter Activity destory 时，销毁engine
         public static int All_FLUTTER_ACTIVITY_DESTROY = 1; //所有flutter Activity destory 时，销毁engine
@@ -216,7 +221,7 @@ public class FlutterBoost {
 
         private BoostLifecycleListener lifecycleListener;
 
-
+        private int activityDestroyCount = 1;
 
 
         public ConfigBuilder(Application app, INativeRouter router) {
@@ -239,6 +244,10 @@ public class FlutterBoost {
             return this;
         }
 
+        public ConfigBuilder initialAfterActivityDestroyCount(int activityDestroyCount) {
+            this.activityDestroyCount = activityDestroyCount;
+            return this;
+        }
         public ConfigBuilder isDebug(boolean isDebug) {
             this.isDebug = isDebug;
             return this;
@@ -258,6 +267,11 @@ public class FlutterBoost {
         public Platform build() {
 
             Platform platform = new Platform() {
+
+                @Override
+                public int initialAfterActivityDestroyCount() {
+                    return ConfigBuilder.this.activityDestroyCount;
+                }
 
                 public Application getApplication() {
                     return ConfigBuilder.this.mApp;
@@ -282,12 +296,10 @@ public class FlutterBoost {
                     return ConfigBuilder.this.whenEngineStart;
                 }
 
-
                 public FlutterView.RenderMode renderMode() {
                     return ConfigBuilder.this.renderMode;
                 }
             };
-
             platform.lifecycleListener = this.lifecycleListener;
             return platform;
 
